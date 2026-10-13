@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'self' blob:; worker-src 'none'">
+  <title>雨聊公众号排版</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="vendor/markdown-it.cjs"></script>
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">聊</span><div><h1>雨聊公众号排版</h1><p>本地编辑 · 图片不上传</p></div></div>
+    <div class="header-note"><span class="local-dot"></span>文件与图片只留在这台电脑</div>
+  </header>
+
+  <main>
+    <section class="filebar" aria-label="文件与附件">
+      <div class="filebar-top">
+        <button id="import-md" class="primary">导入 Markdown</button>
+        <button id="replace-folder">选择／替换附件目录</button>
+        <button id="append-folder">追加附件目录</button>
+        <button id="add-images">添加图片文件</button>
+        <span id="file-summary" class="muted">也可以拖入 .md 或图片</span>
+      </div>
+      <div class="filebar-details">
+        <label class="path-label" for="article-path">文章在所选目录中的相对路径</label>
+        <input id="article-path" type="text" placeholder="例如：文章/我的文章.md" autocomplete="off" spellcheck="false">
+        <label class="check-label"><input id="strip-frontmatter" type="checkbox" checked> 排版时清理开头 YAML 属性</label>
+      </div>
+      <p class="help">先选择需要的文件。图片按原位置解析；属性清理仅影响排版，编辑区与原文件保留。带目录的图片引用需填写文章相对路径。选中的目录只建立文件名索引，仅读取匹配的图片内容。</p>
+      <input id="md-input" type="file" accept=".md,.markdown,text/markdown,text/plain" hidden>
+      <input id="folder-input" type="file" webkitdirectory multiple hidden>
+      <input id="image-input" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,image/avif" multiple hidden>
+      <input id="draft-input" type="file" accept=".json,application/json" hidden>
+    </section>
+
+    <section class="workspace" id="drop-zone">
+      <div class="editor-pane">
+        <div class="pane-heading"><h2>原始正文</h2><span id="word-count" class="muted">0 字</span></div>
+        <div class="component-toolbar" role="toolbar" aria-label="常用 Markdown 排版组件"><div id="component-tools" class="component-tools"></div><div class="edit-history-tools"><button id="undo-edit" title="撤销（Ctrl+Z）" disabled>撤销</button><button id="redo-edit" title="重做（Ctrl+Shift+Z / Ctrl+Y）" disabled>重做</button></div></div>
+        <p class="toolbar-help">选中文字后点击组件，或在光标处插入并修改占位文字。正文可直接编辑，支持撤销与重做。</p>
+        <div class="reference-tools"><button id="clean-reference-whitespace" title="仅清理识别出的参考资料区多余行首空白，可撤销">清理参考资料行首空白</button><span>仅参考区 · 可撤销 · 保留词间空格及必要缩进</span></div>
+        <textarea id="markdown-editor" spellcheck="false" aria-label="Markdown 原始正文" placeholder="导入或拖入 Markdown，也可以在这里粘贴正文和真实图片。&#10;&#10;支持 Obsidian ![[图片.png]]、![[附件/图片.png|300]] 与 Markdown 图片。"></textarea>
+        <div class="editor-footer"><span>粘贴图片会成为本地草稿的一部分</span><span id="save-state" role="status">尚未保存</span></div>
+      </div>
+      <div class="preview-pane">
+        <div class="pane-heading"><h2>实时阅读预览</h2><label for="theme-select" class="sr-only">排版主题</label><select id="theme-select"><option value="clear">清爽 · 青绿</option><option value="warm">温柔 · 暖杏</option><option value="ink">书页 · 墨色</option></select></div>
+        <div class="presentation-controls" aria-label="正文与预览设置">
+          <label>正文字号<select id="article-font-size"><option value="">主题默认</option><option value="14">14 px</option><option value="15">15 px</option><option value="16">16 px</option><option value="17">17 px</option><option value="18">18 px</option><option value="20">20 px</option></select></label>
+          <label>正文行距<select id="article-line-height"><option value="">主题默认</option><option value="1.5">1.5 倍</option><option value="1.65">1.65 倍</option><option value="1.85">1.85 倍</option><option value="2">2 倍</option><option value="2.2">2.2 倍</option></select></label>
+          <label>主题色<input id="article-accent-color" type="color" value="#2e7662" title="仅调整当前排版的主题色"></label><button id="reset-presentation">恢复主题默认</button>
+          <label class="preview-device-label">模拟阅读宽度<select id="preview-device"><option value="phone">手机 · 390 px</option><option value="tablet">平板 · 768 px</option><option value="desktop">电脑 · 1000 px</option></select></label>
+          <label class="preview-sync-label"><input id="preview-scroll-sync" type="checkbox" checked> 双向同步滚动</label>
+        </div>
+        <p class="preview-settings-note">宽度仅模拟阅读空间，不代表真实设备或微信效果；滚动按位置近似同步。画面自动缩放以完整显示，缩放不影响复制或导出。<span id="preview-fit-state" role="status">预览会按右栏可用宽度完整显示</span></p>
+        <div id="preview-surround" class="phone-surround"><div id="preview-stage" class="preview-stage"><iframe id="preview" title="公众号文章预览" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe></div></div>
+        <div class="preview-actions"><button id="copy-rich" class="primary">复制公众号富文本</button><button id="export-html">导出含图片 HTML</button></div>
+        <div class="preflight-action"><button id="run-preflight">发布前排版检查</button><span id="preflight-state" class="muted" role="status"></span></div>
+        <p class="copy-note">复制包含 HTML 与纯文本。微信公众号可能丢弃 Base64 图片；后台保存、图片保留与手机预览仍需手动检查。</p>
+      </div>
+    </section>
+
+    <section class="history-panel" aria-labelledby="history-heading">
+      <div class="history-heading"><div><h2 id="history-heading">相关文章推荐</h2><p>人工选文，未加超链接。只保留标题与本地来源索引，历史正文不会插入当前文章。</p></div><span id="history-summary" class="muted">尚未导入历史文章</span></div>
+      <div class="history-actions"><button id="import-history-folder" class="primary">选择历史文章目录</button><button id="append-history-folder">追加另一个目录</button><button id="import-history-files">单独导入 .md / .txt</button><button id="cancel-history-import" hidden>取消本次导入</button><span id="history-import-state" class="muted" role="status"></span></div>
+      <p class="help history-directory-help">先选择“往期文章”，再追加“文章”。目录仅在你主动选择后读取；仅纳入 Markdown，排除 README、备份等非文章文件。目录内容不代表已发表，请自行勾选适宜推荐的文章。</p>
+      <input id="history-files-input" type="file" accept=".md,.txt,text/markdown,text/plain" multiple hidden><input id="history-folder-input" type="file" webkitdirectory multiple hidden>
+      <div id="history-sources-panel" class="history-sources-panel" hidden><h3>已选择的目录来源</h3><ul id="history-sources" class="history-sources"></ul><p class="help">有增删或改题时，点对应来源的“重新选择更新”，在选择窗口核对位置并选同一目录。浏览器只提供目录名与相对路径，无法辨认磁盘上的另一处同名目录；请勿选错。本工具不会持续同步。目录全空或无法选择时，可用“移除此来源”清理本地索引。</p></div>
+      <p id="history-legacy-state" class="help history-legacy-state" hidden></p>
+      <p id="history-duplicate-state" class="help history-legacy-state" hidden></p>
+      <div class="history-columns">
+        <div class="history-library"><label for="history-search" class="history-label">已导入文章</label><input id="history-search" type="search" placeholder="搜索标题或文件名" autocomplete="off"><ul id="history-articles" class="article-list"></ul><p id="history-empty" class="help">主动选择历史文章目录后，在这里勾选推荐文章。</p></div>
+        <div class="history-selected"><div class="selected-heading"><h3>已选文章（按正文顺序）</h3><button id="clear-history-selection">清空选择</button></div><ol id="history-selected" class="selected-list"></ol><p id="history-footer-state" class="help">勾选后会在正文末尾生成“相关文章推荐：”及标题列表。</p></div>
+      </div>
+      <ul id="history-issues" class="history-issues" hidden></ul>
+      <p class="help">列表可在正文中修改；再次调整选文会更新已生成列表。预览、复制和 HTML 导出只包含勾选标题，不含本地来源路径或历史正文；粘贴到公众号后，请自行给标题加超链接。单独文件与目录索引均留在本机，不生成目录文档。</p>
+    </section>
+    <section id="preflight-panel" class="preflight-panel" aria-labelledby="preflight-heading" hidden><div class="preflight-heading"><h2 id="preflight-heading">发布前排版提示</h2><button id="close-preflight">收起</button></div><p class="help">仅提醒缺图、空占位、重复推荐和长标题；阈值是排版建议，不是微信官方规则或内容审核。不会修改正文，也不会阻止复制或导出。点击结果可定位正文。</p><p id="preflight-summary" class="help"></p><ul id="preflight-results"></ul></section>
+    <section id="issues-panel" class="issues-panel" aria-labelledby="issues-heading" hidden><h2 id="issues-heading">图片与排版提示</h2><ul id="issues-list"></ul></section>
+    <section class="draftbar" aria-label="本地草稿">
+      <div><strong>本地草稿</strong><span class="muted"> 自动保存及最近 8 份备份，存于当前浏览器</span></div>
+      <div class="draft-actions"><button id="export-draft">导出完整草稿</button><button id="import-draft">导入草稿</button><select id="backup-select" aria-label="选择草稿备份"><option value="">选择备份…</option></select><button id="restore-backup">恢复备份</button><button id="clear-drafts" class="quiet-danger">清除本机草稿</button></div>
+      <p class="help">完整草稿包含 Markdown、主题、相对路径、已选文件的路径索引及已读取／粘贴图片；未匹配的文件内容不打包。建议另存一份；无痕模式、清理浏览器数据或存储容量不足会影响自动保存。</p>
+    </section>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+  </main>
+  <footer><span>有问题请联系公众号谢雨聊</span><small>不改动 Obsidian 原稿 · 不上传图片</small></footer>
+</body>
+</html>

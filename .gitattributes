@@ -1,0 +1,12 @@
+* text=auto eol=lf
+*.mjs text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.yml text eol=lf
+# Preserve actual CRLF bytes in git archives and Download ZIP, too.
+*.cmd -text
+vendor/markdown-it.cjs -text
+vendor/markdown-it-package.json -text
+vendor/*-LICENSE.txt -text
+*.png binary

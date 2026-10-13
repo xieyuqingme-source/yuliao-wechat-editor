@@ -1,0 +1,53 @@
+# Only source, documentation and the reviewed synthetic examples are public.
+# Add new public paths deliberately; personal articles/images/drafts stay ignored.
+*
+!/.gitignore
+!/.gitattributes
+!/*.mjs
+!/index.html
+!/styles.css
+!/LICENSE
+!/README.md
+!/VERIFICATION.md
+!/CONTRIBUTING.md
+!/THIRD_PARTY_NOTICES.md
+!/启动谢雨聊.cmd
+!/.github/
+!/.github/workflows/
+!/.github/workflows/check.yml
+!/vendor/
+!/vendor/markdown-it.cjs
+!/vendor/markdown-it-package.json
+!/vendor/markdown-it-LICENSE.txt
+!/vendor/Raphael-LICENSE.txt
+!/tests/
+!/tests/*.test.mjs
+!/docs/
+!/docs/USAGE.md
+!/docs/PAGES.md
+!/samples/
+!/samples/使用说明.md
+!/samples/相关文章示例.md
+!/samples/正常示例-导出.html
+!/samples/generate-export.mjs
+!/samples/generate-images.mjs
+!/samples/history/
+!/samples/history/01_散步与观察_重复副本.md
+!/samples/history/01_散步与观察.md
+!/samples/history/02_留一点空白.txt
+!/samples/history/03_标题特殊字符.md
+!/samples/history/04_同标题_甲.md
+!/samples/history/05_同标题_乙.md
+!/samples/history/06_没有一级标题的文章.md
+!/samples/vault/
+!/samples/vault/其他/
+!/samples/vault/其他/同名.png
+!/samples/vault/文章/
+!/samples/vault/文章/同位 图片.png
+!/samples/vault/文章/异常示例.md
+!/samples/vault/文章/正常示例.md
+!/samples/vault/附件/
+!/samples/vault/附件/标准 图.png
+!/samples/vault/附件/宽图.png
+!/samples/vault/附件/同名.png
+!/samples/vault/附件/中文 空格图片.png
